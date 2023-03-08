@@ -7,11 +7,15 @@
 
 ## 概要
  このJavascriptは、[Very Pinch](https://github.com/yongzhenlow/email-autocomplete)さんが作成した、autoKana2 1.0.31 を、Vanilla JS (ライブラリに依存しない素のJavascript)にリメイクしたものです。
+
  jQueryがなくても動作し、他のライブラリやテンプレートと競合しません。
+
  入力欄Ａに対して入力された文字のカナを自動的に取り出して入力欄Ｂに反映します。
+
 
 ### Download
  ダウンロードしたdist/autoKana2-vanilla.min.jsを自身の使用したいディレクトリに配置して使用して下さい。
+
  CDNを利用すると、jsファイルの設置は不要になります。
 
 
