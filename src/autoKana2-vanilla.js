@@ -12,7 +12,7 @@
 	window.autoKana2 = function (kanjiElement, kanaElement, options) {
 
 		// キーボードを１タイプで入力できるJIS X0208の文字を対象とする
-		const ruby_pattern = new RegExp("[^　ぁ-?ァ-ヶＡ-Ｚａ-ｚ０-９‘～｀！＠＃＄％＾＆＊（）＿ー－＝＋｛｝「」［］￥＼｜；：’”＜＞、。，．・？／♪?…☆→○×÷〒々〆]", "g");
+		const ruby_pattern = new RegExp("[^　ぁ-ゖァ-ヶＡ-Ｚａ-ｚ０-９‘～｀！＠＃＄％＾＆＊（）＿ー－＝＋｛｝「」［］￥＼｜；：’”＜＞、。，．・？／♪€…☆→○×÷〒々〆]", "g");
 		// 英数記号削除用
 		const check_pattern = new RegExp("[^　ァ-ヶー]", "g");
 		// 末尾のｎチェック用(ｎｎ自動保管対策)
