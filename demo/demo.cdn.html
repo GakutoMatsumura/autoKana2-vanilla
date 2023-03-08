@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="content-language" content="ja">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<meta name="format-detection" content="telephone=no">
+<title>Demo(CDN) : autoKana2-vanilla.js</title>
+<script src="//cdn.jsdelivr.net/gh/GakutoMatsumura/autoKana2-vanilla@main/dist/autoKana2-vanilla.min.js"></script>
+<style>
+input {
+	margin: 10px;
+	padding: 10px;
+	font-size: 20px;
+}
+</style>
+</head>
+<h1>Demo(CDN) : autoKana2-vanilla.js</h1>
+<input id="kanji_input_id" name="kanji" type="text" size="80"><br>
+<input id="kana_input_id" name="kana" type="text" size="80"><br>
+<script>
+document.addEventListener("DOMContentLoaded", function(e) {
+	autoKana("#kanji_input_id","#kana_input_id", {
+		katakana: true,
+		emptyInputCallback: function () { return true; }//戻り値にtrueを指定すると、空欄時にカナ欄をリセット。falseを指定するとそのまま過去のカナが残る
+	});
+});
+</script>
+</body>
+</html>
