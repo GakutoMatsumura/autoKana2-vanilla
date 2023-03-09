@@ -39,6 +39,7 @@
 document.addEventListener("DOMContentLoaded", function(e) {
 	autoKana("#kanji_input_id","#kana_input_id", {
 		katakana: true,
+		notSupportAlert: false,
 		emptyInputCallback: function () { return true; }//戻り値にtrueを指定すると、空欄時にカナ欄をリセット。falseを指定するとそのまま過去のカナが残る
 	});
 });
@@ -49,8 +50,17 @@ document.addEventListener("DOMContentLoaded", function(e) {
 ## Settings
 | Option | Type | Default | Description |
 | --- | --- | --- | --- |
-| katakana | bool | true | katakana or hiragana. |
-| emptyInputCallback | function | return "true" is empty reset kana box. |
+| katakana | bool | true | カタカナにする。falseでひらがなに。 |
+| notSupportAlert | bool | false | ルビ変換がサポート外の場合にアラートを出す。 |
+| emptyInputCallback | function(){return true} | trueを返す場合に、入力欄が空の場合カナ欄も空にリセットする。 |
+
+
+## autoKana2からの変更点
+* jQuery不要
+* emptyInputCallbackの戻り値がtrueの場合、バックスペースやデリート時に、入力欄が空の場合カナ欄も空にリセットする
+* かな入力における、濁点半濁点がカナ欄に適用されるように修正
+* かな入力における、全角の濁点半濁点文字「゛゜」があると変換がストップしてしまう問題の修正
+* サポート外の際、アラートを出すかどうかのオプションを追加
 
 
 ## Demonstration
@@ -62,7 +72,7 @@ document.addEventListener("DOMContentLoaded", function(e) {
 
 
 ## Author
-### Remake via Vanilla JS edition
+### Vanilla JS リメイクバージョン
 * Gakuto Matsumura
 
 [project site : t7GithubJS (en.thilmera.com)](https://en.thilmera.com/project/t7GithubJS/)

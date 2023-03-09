@@ -1,4 +1,4 @@
-/*! autoKana2-vanilla 1.0.31.2
+/*! autoKana2-vanilla 1.0.31.3
  * MIT License
  * (c) 2023 Gakuto Matsumura (http://github.com/GakutoMatsumura)
  * Based on the autoKana2(1.0.31) library created by:
@@ -11,14 +11,17 @@
 (function (window, document) {
 	window.autoKana2 = function (kanjiElement, kanaElement, options) {
 
-		// キーボードを１タイプで入力できるJIS X0208の文字を対象とする
-		const ruby_pattern = new RegExp("[^　ぁ-ゖァ-ヶＡ-Ｚａ-ｚ０-９‘～｀！＠＃＄％＾＆＊（）＿ー－＝＋｛｝「」［］￥＼｜；：’”＜＞、。，．・？／♪€…☆→○×÷〒々〆]", "g");
+		// キーボードを１タイプで入力できるJIS X0208の文字を対象とする　＊゛と゜を追加
+		const ruby_pattern = new RegExp("[^　ぁ-ゖァ-ヶＡ-Ｚａ-ｚ０-９‘～｀！＠＃＄％＾＆＊（）＿ー－＝＋｛｝「」［］￥＼｜；：’”＜＞、。，．・？／♪€…☆→○×÷〒々〆゛゜]", "g");
 		// 英数記号削除用
-		const check_pattern = new RegExp("[^　ァ-ヶー]", "g");
+		const check_pattern = new RegExp("[^　ぁ-ゖァ-ヶー]", "g");//＊ひらがなを追加
 		// 末尾のｎチェック用(ｎｎ自動保管対策)
 		const n_pattern = new RegExp("[ｎＮnN]", "g");
 		// 入力途中のｍチェック用(MS-IME対策)
 		const m_pattern = new RegExp("[^ｍＭmM]", "g");
+		// カタカナに濁点・半濁点を含むパターン
+		const dakuten_pattern = /[\u3041-\u3096\u30A1-\u30F6]+/g;///[\u3041-\u3096\u30A1-\u30FA\u30FD\u30FF\u3099-\u309C]+/g;
+
 
 		var elKanji = document.querySelector(kanjiElement);
 		var elKana = document.querySelector(kanaElement);
@@ -42,6 +45,7 @@
 		const settings = Object.assign(
 			{
 				"katakana": false,
+				"notSupportAlert": false,
 				"addRubyCallback": function (text) { },
 				"emptyInputCallback": function () { return true; }//戻り値にtrueを指定すると、空欄時にカナ欄をリセット。falseを指定するとそのまま過去のカナが残る
 			},
@@ -64,7 +68,7 @@
 		var isOpera42 = false;
 		if ((ua.indexOf("chrome") > -1) && (ua.indexOf("opr") > -1)) {
 			isOpera = true;
-			var st = ua.indexOf("opr");
+			let st = ua.indexOf("opr");
 			if ((ua.slice(st + 4).indexOf("42.0") > -1) || (ua.slice(st + 4).indexOf("43.0") > -1)) {
 				isOpera42 = true;
 			}
@@ -76,8 +80,8 @@
 		var isChrome55 = false;
 		if ((ua.indexOf("chrome") > -1) && (ua.indexOf("opr") == -1)) {
 			isChrome = true;
-			var st = ua.indexOf("chrome");
-			var ed = ua.indexOf(" ", st);
+			let st = ua.indexOf("chrome");
+			let ed = ua.indexOf(" ", st);
 			if ((ua.substring(st + 7, ed).indexOf("55.0") > -1) || (ua.substring(st + 7, ed).indexOf("56.0") > -1)) {
 				isChrome55 = true;
 			}
@@ -85,13 +89,11 @@
 		var isNintendo = (ua.indexOf("mobile nintendobrowser") > -1);
 		elKanji.addEventListener("change", function (e) {
 			var nowText = elKanji.value;
-			if (!nowText || nowText.length == 0) {
-				if (settings.emptyInputCallback()) resetEmptyKana();
-			}
+			if ( (!nowText || nowText.length == 0 ) && settings.emptyInputCallback()) resetEmptyKana();
 		});
 
 		elKanji.addEventListener("keyup", function (e) {
-			if (e.keyCode === 8/*backspace*/) {
+			if (e.keyCode === 8/*backspace*/ || e.keyCode === 0x2E/*delete*/) {
 				spCaptured = false;
 				var nowText = elKanji.value;
 				if (nowText.length === 0) {
@@ -108,11 +110,13 @@
 			if (defaultText.length > 0 && defaultText.slice(defaultText.length - 1) === "　") spCaptured = true;
 		});
 
-		elKanji.addEventListener("blur", function () {
-			if (elKanji.dataset.notSupport === 1) {
-				alert("正しくルビを取得出来無かった可能性が有ります。");
-			}
-		});
+		if(settings.notSupportAlert) {
+			elKanji.addEventListener("blur", function () {
+				if (elKanji.dataset.notSupport === 1) {
+					alert("正しくルビを取得出来無かった可能性が有ります。");
+				}
+			});
+		}
 
 		elKanji.addEventListener("compositionstart", function (e) {
 			lastRubyStr = "";
@@ -206,16 +210,18 @@
 								let testChar = '';
 								let i = lastRubyStr.length - 1;
 								do {
-									const lstChar = toKatakanaCase(lastRubyStr.substring(i, 1));
-									if (lstChar.replace(check_pattern, '').length !== 0) {
-										testChar = toKatakanaCase(lastRubyStr.substring(0, i + 1));
+									if (lastRubyStr.charAt(i).toKatakanaCase().replace(check_pattern, "").length !== 0){
+										testChar = lastRubyStr.substring(0, i + 1).toKatakanaCase();
 										break;
 									}
-									i--;
+									--i;
 								} while (i > -1);
 
-								if (rubyEditStr.substring(0, testChar.length) !== testChar.substring(0, rubyEditStr.length)) {
-									// かな英数字記号の混ぜ書き変換は無視する
+								let str1 = rubyEditStr.substring(0, testChar.length);
+								let str2 = testChar.substring(0, rubyEditStr.length);
+								if ( str1.match(dakuten_pattern) === str2.match(dakuten_pattern)
+									&& str1 !== str2 ) {
+									// かな英数字記号の混ぜ書き変換は無視する（＊かな入力における濁点半濁点入力の対応を追加）
 									return;
 								}
 							}
@@ -250,21 +256,23 @@
 					}
 
 					if (elKanji.selectionStart == elKanji.value.length) {
-						var rubyEditStrLastChar = rubyEditStr.charAt(rubyEditStr.length - 1).replace(check_pattern, "");
+						let rubyEditStrLastChar = rubyEditStr.charAt(rubyEditStr.length - 1).replace(check_pattern, "");
 						if (rubyEditStrLastChar.length !== 0) {
-							var testChar = "";
-							var i = lastRubyStr.length - 1;
+							let testChar = "";
+							let i = lastRubyStr.length - 1;
 							do {
-								var lstChar = lastRubyStr.charAt(i).toKatakanaCase();
-								if (lstChar.replace(check_pattern, "").length !== 0) {
+								if (lastRubyStr.charAt(i).toKatakanaCase().replace(check_pattern, "").length !== 0){
 									testChar = lastRubyStr.substring(0, i + 1).toKatakanaCase();
 									break;
 								}
 								i--;
 							} while (i > -1);
 
-							if (rubyEditStr.substring(0, testChar.length) !== testChar.substring(0, rubyEditStr.length)) {
-								// かな英数字記号の混ぜ書き変換は無視する
+							let str1 = rubyEditStr.substring(0, testChar.length);
+							let str2 = testChar.substring(0, rubyEditStr.length);
+							if ( str1.match(dakuten_pattern) === str2.match(dakuten_pattern)
+								&& str1 !== str2 ) {
+								// かな英数字記号の混ぜ書き変換は無視する（＊かな入力における濁点半濁点入力の対応を追加）
 								return;
 							}
 						}
@@ -293,7 +301,6 @@
 			if (ieSaveFlag) {
 				checkPatternM(orgInput, lastRubyStr);
 			}
-
 		});
 
 		elKanji.addEventListener("compositionend", function (e) {
@@ -335,28 +342,22 @@
 			//空欄にもどされたらカナもリセットに
 			defaultText = '';
 			orgText = '';
-			if (elKana) elKana.value = '';
+			elKana.value = '';
 		}
 
 		// ルビを追加する
 		function addRuby(target) {
-			var value = settings.katakana ? target.toKatakanaCase() : target.toHiraganaCase();
-			elKana.value = elKana.value + appendN(value);
-			settings.addRubyCallback(appendN(value));
-		}
-
-		// 文字列の最後がｎで終わってる場合、んに変換する
-		function appendN(target) {
-			var result = target;
-			if (target.toKatakanaCase().replace(check_pattern, "").replace("　", "").length > 0) {
-				var lastStr = target.substring(target.length - 1);
-				if (lastStr.replace(n_pattern, "").length === 0) {
-					var testStr = target.substring(0, target.length - 1);
-					result = testStr;
-					result += settings.katakana ? "ン" : "ん";
+			const value = settings.katakana ? target.toKatakanaCase() : target.toHiraganaCase();
+			
+			// 文字列の最後がｎで終わってる場合、んに変換する : origin function appendN
+			var result = value;
+			if (value.toKatakanaCase().replace(check_pattern, "").replace("　", "").length > 0) {
+				if (value.substring(value.length - 1).replace(n_pattern, "").length === 0) {
+					result = value.substring(0, value.length - 1) + ( settings.katakana ? "ン" : "ん" );
 				}
 			}
-			return result;
+			elKana.value = elKana.value + result.replace(check_pattern, "");
+			settings.addRubyCallback(result);
 		}
 
 		// MS-IMEで入力途中にタイプミスでmを入力した後に変換するとmがnとして扱われるためエラーフラグを立てる
@@ -368,25 +369,25 @@
 		}
 
 	};
+	//autoKana2をautoKanaにも定義(旧autoKana互換)
 	window.autoKana = window.autoKana2;
 })(window, document);
 
-//　平仮名を片仮名へ変換する
+//　平仮名を片仮名へ変換する (＊濁点、半濁点を含む)
 String.prototype.toKatakanaCase = function () {
-	return this.replace(/[\u3041-\u3096]/g, function (match) {
-		var chr = match.charCodeAt(0) + 0x60;
-		return String.fromCharCode(chr);
+	return this.replace(/[\u3041-\u3096\u3099-\u309E\u30F4\u309A]/g, function (match) {//origin /[\u3041-\u3096]/g
+		const value = match.charCodeAt(0);
+		return String.fromCharCode(value + (value < 0x3099 ? 0x60 : 0x62));
 	});
 };
 
-//　片仮名を平仮名へ変換する
+//　片仮名を平仮名へ変換する (＊濁点、半濁点を含む)
 String.prototype.toHiraganaCase = function () {
-	return this.replace(/[\u30a1-\u30f6]/g, function (match) {
-		var chr = match.charCodeAt(0) - 0x60;
-		return String.fromCharCode(chr);
+	return this.replace(/[\u30a1-\u30f6\u3099-\u309E\u30F4\u309A]/g, function (match) {//origin /[\u30a1-\u30f6]/g
+		const value = match.charCodeAt(0);
+		return String.fromCharCode(value - (value >= 0x30FD ? 0x60 : 0x5F));
 	});
 };
-
 
 // JIS X0201の文字をJIS X0208に変換する
 String.prototype.toWideCase = function () {
