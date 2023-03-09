@@ -1,4 +1,4 @@
-/*! autoKana2-vanilla 1.0.31.1
+/*! autoKana2-vanilla 1.0.31.2
  * MIT License
  * (c) 2023 Gakuto Matsumura (http://github.com/GakutoMatsumura)
  * Based on the autoKana2(1.0.31) library created by:
@@ -123,11 +123,11 @@
 				selectText = elKanji.value.slice(elKanji.selectionStart, elKanji.selectionEnd);
 				if (selectText.length > 0) {
 					orgText = orgText.slice(0, elKanji.selectionStart) + orgText.slice(elKanji.selectionEnd, orgText.length);
-					if (isFirefox && beforeCommitStr.length > 0 && beforeCommitStr === e.originalEvent.data) {
+					if (isFirefox && beforeCommitStr.length > 0 && e.originalEvent && beforeCommitStr === e.originalEvent.data) {
 						ff_msimeFlag = true;
 					}
 				} else {
-					if (beforeCommitStr.length > 0 && beforeCommitStr === e.originalEvent.data) {
+					if (beforeCommitStr.length > 0 && e.originalEvent && beforeCommitStr === e.originalEvent.data) {
 						let ruby = elKana.value;
 						elKana.value = ruby.substring(0, ruby.length - beforeCommitStr.length);
 						lastRubyStr = e.originalEvent.data;

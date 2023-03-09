@@ -6,7 +6,7 @@
 
 
 ## 概要
- このJavascriptは、[Very Pinch](https://github.com/yongzhenlow/email-autocomplete)さんが作成した、autoKana2 1.0.31 を、Vanilla JS (ライブラリに依存しない素のJavascript)にリメイクしたものです。
+ このJavascriptは、[Very Pinch](https://github.com/VeryPinch/autoKana2)さんが作成した、autoKana2 1.0.31 を、Vanilla JS (ライブラリに依存しない素のJavascript)にリメイクしたものです。
 
  jQueryがなくても動作し、他のライブラリやテンプレートと競合しません。
 
