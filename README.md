@@ -52,7 +52,7 @@ document.addEventListener("DOMContentLoaded", function(e) {
 | --- | --- | --- | --- |
 | katakana | bool | true | カタカナにする。falseでひらがなに。 |
 | notSupportAlert | bool | false | ルビ変換がサポート外の場合にアラートを出す。 |
-| emptyInputCallback | function(){return true} | trueを返す場合に、入力欄が空の場合カナ欄も空にリセットする。 |
+| emptyInputCallback | function | return true | trueを返す場合に、入力欄が空の場合カナ欄も空にリセットする。 |
 
 
 ## autoKana2からの変更点
